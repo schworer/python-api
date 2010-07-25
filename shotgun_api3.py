@@ -1,132 +1,14 @@
 #!/usr/bin/env python
-# ---------------------------------------------------------------------------------------------
-# Copyright (c) 2009-2010, Shotgun Software Inc
-# 
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are met:
-# 
-#  - Redistributions of source code must retain the above copyright notice, this
-#    list of conditions and the following disclaimer. 
-#    
-#  - Redistributions in binary form must reproduce the above copyright notice,
-#    this list of conditions and the following disclaimer in the documentation
-#    and/or other materials provided with the distribution.
-#    
-#  - Neither the name of the Shotgun Software Inc nor the names of its
-#    contributors may be used to endorse or promote products derived from this
-#    software without specific prior written permission.
-# 
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
-# ---------------------------------------------------------------------------------------------
-# docs and latest version available for download at
-#   https://support.shotgunsoftware.com/forums/48807-developer-api-info
-# ---------------------------------------------------------------------------------------------
+
+"""
+Python Shotgun API library.
+
+docs and latest version available for download at
+ https://support.shotgunsoftware.com/forums/48807-developer-api-info
+"""
 
 __version__ = "3.0.1"
 
-# ---------------------------------------------------------------------------------------------
-# SUMMARY
-# ---------------------------------------------------------------------------------------------
-"""
-Python Shotgun API library.
-"""
-
-# ---------------------------------------------------------------------------------------------
-# TODO
-# ---------------------------------------------------------------------------------------------
-"""
- - add a configurable timeout duration (python xml-rpc lib never times out by default)
- - include a native python https implementation, when native https is not available (e.g. maya's python)
- - convert duration fields to/from a native python object?
- - make file fields an http link to the file
- - add logging functionality
- - add scrubbing to text data sent to server to make sure it is all valid unicode
- - support removing thumbnails / files (can only create or replace them now)
-"""
-
-# ---------------------------------------------------------------------------------------------
-# CHANGELOG
-# ---------------------------------------------------------------------------------------------
-"""
-v3.0.1 - 2010 May 10
-  + find(): default sorting to ascending, if not set (instead of requiring ascending/descending)
-  + upload() and upload_thumbnail(): pass auth info through
-
-v3.0 - 2010 May 5
-  + add batch() method to do multiple create, update, and delete requests in one
-    request to the server (requires Shotgun server to be v1.13.0 or higher)
-
-v3.0b8 - 2010 Feb 19
-  + fix python gotcha about using lists / dictionaries as defaults.  See:
-     http://www.ferg.org/projects/python_gotchas.html#contents_item_6
-  + add schema_read method
-  
-v3.0b7 - 2009 November 30
-  + add additional retries for connection errors and a catch for broken pipe exceptions
-
-v3.0b6 - 2009 October 20
-  + add support for HTTP/1.1 keepalive, which greatly improves performance for multiple requests
-  + add more helpful error if server entered is not http or https
-  + add support assigning tags to file uploads (for Shotgun version >= 1.10.6)
-
-v3.0b5 - 2009 Sept 29
-  + fixed deprecation warnings to raise Exception class for python 2.5
-
-v3.0b4 - 2009 July 3
-  + made upload() and upload_thumbnail() methods more backwards compatible 
-  + changes to find_one():
-    + now defaults to no filter_operators
-  
-v3.0b3 - 2009 June 24
-  + fixed upload() and upload_thumbnail() methods
-  + added download_attachment() method
-  + added schema_* methods for accessing entities and fields
-  + added support for http proxy servers
-  + added __version__ string
-  + removed RECORDS_PER_PAGE global (can just set records_per_page on the Shotgun object after initializing it)
-  + removed api_ver from the constructor, as this class is only designed to work with api v3
-
-v3.0b2 - 2009 June 2
-  + added preliminary support for http proxy servers
-
-v3.0b1 - 2009 May 25
-  + updated to use v3 of the XML-RPC API to communicate with the Shotgun server
-  + the "limit" option for find() now works fully
-  + errors from the server are now raised as xml-rpc Fault exceptions (previously just wrote the error into the
-    results, and you had to check for it explicitly -- which most people didn't do, so they didn't see the errors)
-  + changes to find():
-    + in the "order" param "column" has been renamed to "field_name" to be consistent
-    + new option for complex filters that allow grouping
-    + supports linked fields ("sg_project.Project.name")
-  + changes to create():
-    + now accepts "return_fields" param, which is an array of field names to return when creating the entity.    
-      Previously returned only the id.
-
-v1.2 - 2009 Apr 28
-  + updated compatibility for Python 2.4+
-  + added convert_datetimes_to_utc flag to assume all datetimes are in local time (disabled by default to maintain
-    current behavior)
-  + upload() now returns id of Attachment created
-
-v1.1 - 2009 Mar 27
-  + added retired_only parameter to find()
-  + fixed bug preventing attachments from being uploaded without linking to a specific field
-  + minor error message formatting tweaks
-"""
-
-# ---------------------------------------------------------------------------------------------
-# Imports
-# ---------------------------------------------------------------------------------------------
 import cookielib
 import cStringIO
 import mimetools
@@ -140,9 +22,6 @@ import urllib
 import urllib2
 from urlparse import urlparse
 
-# ---------------------------------------------------------------------------------------------
-# Shotgun Object
-# ---------------------------------------------------------------------------------------------
 class ShotgunError(Exception): pass
 
 class Shotgun(object):
@@ -158,11 +37,16 @@ class Shotgun(object):
         self.server = None
         if base_url.split("/")[0] not in ("http:","https:"):
             raise ShotgunError("URL protocol must be http or https.  Value was '%s'" % base_url)
-        self.base_url = "/".join(base_url.split("/")[0:3]) # cheesy way to strip off anything past the domain name, so:
-                                                           # http://blah.com/asd => http://blah.com
+
+        # cheesy way to strip off anything past the domain name, so:
+        # http://blah.com/asd => http://blah.com
+        self.base_url = "/".join(base_url.split("/")[0:3]) 
         self.script_name = script_name
         self.api_key = api_key
-        self.api_ver = 'api3_preview' # keep using api3_preview to be compatible with older servers
+
+        # keep using api3_preview to be compatible with older servers
+        self.api_ver = 'api3_preview' 
+
         self.api_url = "%s/%s/" % (self.base_url, self.api_ver)
         self.convert_datetimes_to_utc = convert_datetimes_to_utc
         self.sid = None # only load this if needed
@@ -601,7 +485,6 @@ class ShotgunCRUD(object):
                 eval('%s.write(e.faultString)' % self.__err_stream)
                 eval('%s.write("\\n" + "-"*80 + "\\n")' % self.__err_stream)
             raise
-
 
 
 # Based on http://code.activestate.com/recipes/146306/
