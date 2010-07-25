@@ -1,0 +1,9 @@
+TODO
+
+ - add a configurable timeout duration (python xml-rpc lib never times out by default)
+ - include a native python https implementation, when native https is not available (e.g. maya's python)
+ - convert duration fields to/from a native python object?
+ - make file fields an http link to the file
+ - add logging functionality
+ - add scrubbing to text data sent to server to make sure it is all valid unicode
+ - support removing thumbnails / files (can only create or replace them now)
