@@ -84,7 +84,7 @@ class Shotgun(object):
             elif response_code == '0':
                 break                        
         # if it's an error, message is printed on second line
-        raise ValueError, "%s:%s " % (entity_type,entity_id)+f.read().strip()
+        raise ValueError("%s:%s " % (entity_type,entity_id)+f.read().strip())
     
     def schema_read(self):
         resp = self._api3.schema_read()
@@ -489,7 +489,7 @@ class ShotgunCRUD(object):
                 self.__err_stream.write("XMLRPC Fault %s: \\n" % e.faultCode)
                 self.__err_stream.write(e.faultString)
                 self.__err_stream.write("\\n" + "-"*80 + "\\n")
-            raise
+            raise e
 
 
 # Based on http://code.activestate.com/recipes/146306/
