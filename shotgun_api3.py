@@ -489,8 +489,9 @@ class ShotgunCRUD(object):
             raise e
 
 if __name__ == "__main__":
-    
-    sg = Shotgun('http://localhost:3000', 'wrapper_script', 'ca8e878c9c7f6d8ab3bf1d92fd1a624361cf4e6e')
+   
+    api_key = 'ca8e878c9c7f6d8ab3bf1d92fd1a624361cf4e6e'
+    sg = Shotgun('http://localhost:3000', 'wrapper_script', api_key)
 
     # from pprint import pprint
     # for i in range(1001,5000):
