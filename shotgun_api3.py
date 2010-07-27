@@ -10,20 +10,11 @@ docs and latest version available for download at
 __version__ = "3.0.1"
 
 import cookielib
-import cStringIO
-import mimetools
-import mimetypes
 import os
-import re
-import stat
-import sys
-import time
-import urllib
 import urllib2
 from urlparse import urlparse
 
 from lib.form_post_handler import FormPostHandler
-from lib.timezone_sg import sg_timezone
 from lib.xmlrpc_sg import ServerProxy, ProxiedTransport, Fault
 
 class ShotgunError(Exception): pass
@@ -498,10 +489,10 @@ class ShotgunCRUD(object):
             raise e
 
 if __name__ == "__main__":
-    from pprint import pprint
     
     sg = Shotgun('http://localhost:3000', 'wrapper_script', 'ca8e878c9c7f6d8ab3bf1d92fd1a624361cf4e6e')
 
+    # from pprint import pprint
     # for i in range(1001,5000):
     #     pprint(sg.create("Asset",{"code":"Asset %d"%i,"project_names":"Test Project"}))
     # 
