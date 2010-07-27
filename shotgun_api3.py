@@ -25,9 +25,11 @@ from urlparse import urlparse
 class ShotgunError(Exception): pass
 
 class Shotgun(object):
-    # Used to split up requests into batches of records_per_page when doing requests.  this helps speed tremendously
-    # when getting lots of results back.  doesn't affect the interface of the api at all (you always get the full set
-    # of results back as one array) but just how the client class communicates with the server.
+    # Used to split up requests into batches of records_per_page when doing 
+    # requests.  this helps speed tremendously when getting lots of results
+    # back.  doesn't affect the interface of the api at all (you always get the
+    # full set of results back as one array) but just how the client class 
+    # communicates with the server.
     records_per_page = 500
 
     def __init__(self, base_url, script_name, api_key, convert_datetimes_to_utc=True, http_proxy=None):
@@ -69,7 +71,7 @@ class Shotgun(object):
         """
         url = self.base_url + "/upload/get_thumbnail_url?entity_type=%s&entity_id=%d"%(entity_type,entity_id)
         for i in range(3):
-            f = urllib.urlopen(url)
+            f = urllib2.urlopen(url)
             response_code = f.readline().strip()
             # something else happened. try again. found occasional connection errors still spit out html but not
             # the correct response codes. usually trying again will right the ship. if not, we catch for it later.
@@ -474,16 +476,19 @@ class ShotgunCRUD(object):
     
     def meta_caller(self, attr, *args, **kwargs):
         try:
-            return eval(
-                'self._%s__sg.%s(self._%s__auth_args, *args, **kwargs)' %
-                (self.__class__.__name__, attr, self.__class__.__name__)
-            )
+
+            # attempt to get the remote call from the Proxy Server
+            rpc_func = getattr(self.__sg, attr, None)
+            if rpc_func:
+                return rpc_func(self.__auth_args, *args, **kwargs)
+            else:
+                raise ShotgunError('No attribute %s on rpc server' % attr)
         except Fault, e:
             if self.__err_stream:
-                eval('%s.write("\\n" + "-"*80 + "\\n")' % self.__err_stream)
-                eval('%s.write("XMLRPC Fault %s:\\n")' % (self.__err_stream, e.faultCode))
-                eval('%s.write(e.faultString)' % self.__err_stream)
-                eval('%s.write("\\n" + "-"*80 + "\\n")' % self.__err_stream)
+                self.__err_stream.write("\\n" + "-"*80 + "\\n")
+                self.__err_stream.write("XMLRPC Fault %s: \\n" % e.faultCode)
+                self.__err_stream.write(e.faultString)
+                self.__err_stream.write("\\n" + "-"*80 + "\\n")
             raise
 
 
