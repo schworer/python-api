@@ -12,6 +12,7 @@ __version__ = "3.0.1"
 import cookielib
 import os
 import urllib2
+import sys
 from urlparse import urlparse
 
 from lib.form_post_handler import FormPostHandler
@@ -456,7 +457,7 @@ class ShotgunCRUD(object):
         if 'error_stream' in options:
             self.__err_stream = options['error_stream']
         else:
-            self.__err_stream = 'sys.stderr'
+            self.__err_stream = sys.stderr
         if 'http_proxy' in options and options['http_proxy']:
             p = ProxiedTransport()
             p.set_proxy( options['http_proxy'] )
