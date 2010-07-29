@@ -178,14 +178,15 @@ class Shotgun(object):
         }
         
         if order:
-           req['sorts'] = []
-           for sort in order:
-               if sort.has_key('column'):
-                   # TODO: warn about deprecation of 'column' param name
-                   sort['field_name'] = sort['column']
-               if not sort.has_key('direction'):
-                   sort['direction'] = 'asc'
-               req['sorts'].append({'field_name': sort['field_name'],'direction' : sort['direction']})
+            req['sorts'] = []
+            for sort in order:
+                if sort.has_key('column'):
+                    # TODO: warn about deprecation of 'column' param name
+                    sort['field_name'] = sort['column']
+                if not sort.has_key('direction'):
+                    sort['direction'] = 'asc'
+                req['sorts'].append({'field_name': sort['field_name'],
+                                     'direction' : sort['direction']})
         
         if (limit and limit > 0 and limit < self.records_per_page):
             req["paging"]["entities_per_page"] = limit
