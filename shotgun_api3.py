@@ -483,12 +483,10 @@ class ShotgunCRUD(object):
                 raise ShotgunError('No attribute %s on rpc server' % attr)
         except Fault, e:
             if self.__err_stream:
-                # FIXME: make __err_stream be passed a file-like object
-                err = eval(self.__err_stream)
-                err.write("\\n" + "-"*80 + "\\n")
-                err.write("XMLRPC Fault %s: \\n" % e.faultCode)
-                err.write(e.faultString)
-                err.write("\\n" + "-"*80 + "\\n")
+                self.__err_stream.write("\\n" + "-"*80 + "\\n")
+                self.__err_stream.write("XMLRPC Fault %s: \\n" % e.faultCode)
+                self.__err_stream.write(e.faultString)
+                self.__err_stream.write("\\n" + "-"*80 + "\\n")
             raise e
 
 if __name__ == "__main__":
