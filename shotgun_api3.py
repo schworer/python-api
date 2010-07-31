@@ -149,7 +149,8 @@ class Shotgun(object):
         if order == None: 
             order = []
         
-        if type(filters) == type([]):
+        # we want to check if filters is iterable, not only if it's a list.
+        if hasattr(filters, '__iter__'):
             new_filters = {}
             if not filter_operator or filter_operator == "all":
                 new_filters["logical_operator"] = "and"
@@ -491,7 +492,6 @@ class ShotgunCRUD(object):
             raise e
 
 if __name__ == "__main__":
-   
     api_key = 'ca8e878c9c7f6d8ab3bf1d92fd1a624361cf4e6e'
     sg = Shotgun('http://localhost:3000', 'wrapper_script', api_key)
 
